@@ -10,7 +10,9 @@ var todos = [{
                 text: 'First to do test'
             }, {
                 _id: new ObjectID(),
-                text: 'Second to do test'
+                text: 'Second to do test',
+                completed: true,
+                completedAt: 8800
             }]
 
 beforeEach((done) => {
@@ -113,7 +115,7 @@ describe('DELETE /todos/:id', () => {
             if (!err)
                 return done(err)
             
-            Todo.findById(hexId).then((todo) => {
+            Todo.findById(newTodo._id).then((todo) => {
                 expect(todo).toNotExist();
                 done()
             }).catch((e) => done(e))
@@ -132,6 +134,44 @@ describe('DELETE /todos/:id', () => {
         request(app)
         .delete(`/todos/${hexId}`)
         .expect(404)
+        .end(done)
+    })
+})
+
+describe('PATCH /todos/:id', () => {
+    it('Should update todo', (done) => {
+        var newTodo = {
+            _id: todos[0]._id.toHexString(),
+            text: 'this should be new text',
+            completed: true
+        }
+        request(app)
+        .patch(`/todos/${newTodo._id}`)
+        .send(newTodo)
+        .expect(200)
+        .expect((res)=>{
+            expect(res.body.todo.text).toBe(newTodo.text)
+            expect(res.body.todo.completedAt).toBeA('number')
+            expect(res.body.todo.completed).toBe(true)
+        })
+        .end(done)
+    })
+    
+    it('Should clear completedAt when todo is not complete', (done) => {
+        var newTodo = {
+            _id: todos[1]._id.toHexString(),
+            text: 'this should be new text!!',
+            completed: false
+        }
+
+        request(app)
+        .patch(`/todos/${newTodo._id}`)
+        .send(newTodo)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(newTodo.text)
+            expect(res.body.todo.completed).toBe(false)
+            expect(res.body.todo.completedAt).toNotExist()
+        })
         .end(done)
     })
 })
