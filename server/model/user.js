@@ -53,6 +53,27 @@ UserSchema.methods.generateAuthToken = function() {
     })
 }
 
+UserSchema.statics.findByToken = function(token) {
+    var user = this
+    var decoded
+    var salt = base64url('123abc')
+
+    try {
+        decoded = jwt.verify(token, salt)
+    } catch(e) {
+        // return new Promise((resolve, reject)=>{
+        //     reject()
+        // })
+        return Promise.reject('Email and/or password is invalid')
+    }
+    
+    return user.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    })
+} 
+
 var User = mongoose.model('User', UserSchema)
 
 module.exports = {User}
