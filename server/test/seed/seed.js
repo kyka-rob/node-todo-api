@@ -18,17 +18,23 @@ const users = [{
 }, {
     _id: userIdTwo,
     email: 'jang@dev.apple.com',
-    password: 'userPassTwo'
+    password: 'userPassTwo',
+    tokens: [{
+        access: 'auth',
+        token: jwt.sign({_id: userIdTwo, access: 'auth'}, base64url.encode('123abc')).toString()
+    }]
 }]
 
 const todos = [{
     _id: new ObjectID(),
-    text: 'First to do test'
+    text: 'First to do test',
+    _creator: userIdOne
 }, {
     _id: new ObjectID(),
     text: 'Second to do test',
     completed: true,
-    completedAt: 8800
+    completedAt: 88,
+    _creator: userIdTwo
 }]
 
 const populateTodos = (done) => {
@@ -42,7 +48,7 @@ const populateUsers = (done) => {
         var user1 = new User(users[0]).save()
         var user2 = new User(users[1]).save()
         // This Promise not get fired until user1 and user2 were successfully to save
-         return Promise.all([user1, user2])
+        return Promise.all([user1, user2])
     }).then(() => done())
 }
 
