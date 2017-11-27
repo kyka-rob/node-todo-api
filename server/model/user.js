@@ -44,7 +44,7 @@ UserSchema.methods.toJSON = function() {
 UserSchema.methods.generateAuthToken = function() {
     var user = this
     var access = 'auth'
-    var salt = base64url('123abc')
+    var salt = base64url(process.env.JWT_SECRET)
     var token = jwt.sign({_id: user._id.toHexString(), access}, salt).toString()
 
     user.tokens.push({access, token})
@@ -66,7 +66,7 @@ UserSchema.methods.removeToken = function(token) {
 UserSchema.statics.findByToken = function(token) {
     var user = this
     var decoded
-    var salt = base64url('123abc')
+    var salt = base64url(process.env.JWT_SECRET)
 
     try {
         decoded = jwt.verify(token, salt)
